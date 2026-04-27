@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.examen.Objeto.Servicio;
-import com.example.examen.Servicio.ServicioServicio;
+import com.example.examen.Servicio.ServicioServicio;    
 
 import jakarta.validation.Valid;
 
