@@ -27,6 +27,11 @@ public class MedicoControlador {
         return servicio.guardar(m);
     }
 
+    @PutMapping("/{id}")
+    public Medico actualizar(@PathVariable Long id, @Valid @RequestBody Medico m) {
+        return servicio.actualizar(id, m);
+    }
+
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         servicio.eliminar(id);
