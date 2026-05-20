@@ -1,5 +1,6 @@
 package com.example.examen.Servicio;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class ConsultaServicio {
     private UsuarioRepositorio usuarioRepositorio;
 
     public Consulta guardar(Consulta c) {
+        validarConsultaBase(c, true);
 
         c.setPaciente(
             pacienteRepositorio.findById(c.getPaciente().getId())
@@ -45,16 +47,7 @@ public class ConsultaServicio {
                 .orElseThrow(() -> new RuntimeException("Médico no existe"))
         );
 
-        List<Servicio> servicios = new java.util.ArrayList<>();
-
-        for (Servicio s : c.getServicios()) {
-            Servicio servicio = servicioRepositorio.findById(s.getId())
-                .orElseThrow(() -> new RuntimeException("Servicio no existe: " + s.getId()));
-
-            servicios.add(servicio);
-        }
-
-        c.setServicios(servicios);
+        c.setServicios(obtenerServiciosValidados(c));
 
         return repositorio.save(c);
     }
@@ -70,6 +63,8 @@ public class ConsultaServicio {
         }
 
         if ("PACIENTE".equalsIgnoreCase(rol)) {
+            validarConsultaBase(c, false);
+
             Paciente paciente = pacienteRepositorio.findByUsuarioUsername(username)
                     .orElseThrow(() -> new RuntimeException("Paciente no encontrado para este usuario"));
 
@@ -80,15 +75,7 @@ public class ConsultaServicio {
                     .orElseThrow(() -> new RuntimeException("Médico no existe"))
             );
 
-            List<Servicio> servicios = new java.util.ArrayList<>();
-
-            for (Servicio s : c.getServicios()) {
-                Servicio servicio = servicioRepositorio.findById(s.getId())
-                    .orElseThrow(() -> new RuntimeException("Servicio no existe: " + s.getId()));
-                servicios.add(servicio);
-            }
-
-            c.setServicios(servicios);
+            c.setServicios(obtenerServiciosValidados(c));
 
             return repositorio.save(c);
         }
@@ -130,6 +117,54 @@ public class ConsultaServicio {
     }
 
     public void eliminar(Long id) {
-        repositorio.deleteById(id);
+        Consulta consulta = repositorio.findById(id)
+                .orElseThrow(() -> new RuntimeException("Consulta no encontrada"));
+
+        repositorio.delete(consulta);
+    }
+
+    private void validarConsultaBase(Consulta c, boolean requierePaciente) {
+        if (c == null) {
+            throw new RuntimeException("La consulta no puede ser nula");
+        }
+
+        if (c.getFecha() == null) {
+            throw new RuntimeException("La fecha es obligatoria");
+        }
+
+        if (c.getMotivo() == null || c.getMotivo().trim().isEmpty()) {
+            throw new RuntimeException("El motivo es obligatorio");
+        }
+
+        if (requierePaciente) {
+            if (c.getPaciente() == null || c.getPaciente().getId() == null) {
+                throw new RuntimeException("Debe seleccionar un paciente");
+            }
+        }
+
+        if (c.getMedico() == null || c.getMedico().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un médico");
+        }
+
+        if (c.getServicios() == null || c.getServicios().isEmpty()) {
+            throw new RuntimeException("Debe seleccionar al menos un servicio");
+        }
+    }
+
+    private List<Servicio> obtenerServiciosValidados(Consulta c) {
+        List<Servicio> servicios = new ArrayList<>();
+
+        for (Servicio s : c.getServicios()) {
+            if (s == null || s.getId() == null) {
+                throw new RuntimeException("Servicio inválido");
+            }
+
+            Servicio servicio = servicioRepositorio.findById(s.getId())
+                .orElseThrow(() -> new RuntimeException("Servicio no existe: " + s.getId()));
+
+            servicios.add(servicio);
+        }
+
+        return servicios;
     }
 }
