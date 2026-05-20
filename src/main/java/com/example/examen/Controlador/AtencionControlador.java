@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.examen.Objeto.Atencion;
+import com.example.examen.Objeto.Paciente;
 import com.example.examen.Servicio.AtencionServicio;
 
 import jakarta.validation.Valid;
@@ -27,6 +28,12 @@ public class AtencionControlador {
     public List<Atencion> misAtenciones(Authentication authentication) {
         String username = authentication.getName();
         return servicio.listarPorRol(username);
+    }
+
+    @GetMapping("/mis-pacientes")
+    public List<Paciente> misPacientes(Authentication authentication) {
+        String username = authentication.getName();
+        return servicio.obtenerPacientesDelMedico(username);
     }
 
     @GetMapping("/paciente/{id}")

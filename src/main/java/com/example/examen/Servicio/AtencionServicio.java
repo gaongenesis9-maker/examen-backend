@@ -1,15 +1,18 @@
 package com.example.examen.Servicio;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.examen.Objeto.Atencion;
+import com.example.examen.Objeto.Consulta;
 import com.example.examen.Objeto.Medico;
 import com.example.examen.Objeto.Paciente;
 import com.example.examen.Objeto.Usuario;
 import com.example.examen.Repositorio.AtencionRepositorio;
+import com.example.examen.Repositorio.ConsultaRepositorio;
 import com.example.examen.Repositorio.MedicoRepositorio;
 import com.example.examen.Repositorio.PacienteRepositorio;
 import com.example.examen.Repositorio.UsuarioRepositorio;
@@ -28,6 +31,9 @@ public class AtencionServicio {
 
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
+
+    @Autowired
+    private ConsultaRepositorio consultaRepositorio;
 
     public Atencion guardar(Atencion a) {
         validarAtencionBase(a, true, true);
@@ -104,6 +110,19 @@ public class AtencionServicio {
 
     public List<Atencion> listarPorMedico(Long medicoId) {
         return repositorio.findByMedicoId(medicoId);
+    }
+
+    public List<Paciente> obtenerPacientesDelMedico(String username) {
+        Medico medico = medicoRepositorio.findByUsuarioUsername(username)
+                .orElseThrow(() -> new RuntimeException("Médico no encontrado para este usuario"));
+
+        List<Consulta> consultas = consultaRepositorio.findByMedicoId(medico.getId());
+
+        return consultas.stream()
+                .map(Consulta::getPaciente)
+                .filter(p -> p != null)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     public void eliminar(Long id) {
