@@ -73,6 +73,27 @@ public class HistorialServicio {
         throw new RuntimeException("Solo ADMIN o MEDICO pueden registrar historial");
     }
 
+    public Historial actualizar(Long id, Historial h) {
+        Historial historialExistente = repositorio.findById(id)
+                .orElseThrow(() -> new RuntimeException("Historial no encontrado"));
+
+        validarHistorialBase(h, true, true);
+
+        Paciente paciente = pacienteRepositorio.findById(h.getPaciente().getId())
+                .orElseThrow(() -> new RuntimeException("Paciente no existe"));
+
+        Medico medico = medicoRepositorio.findById(h.getMedico().getId())
+                .orElseThrow(() -> new RuntimeException("Médico no existe"));
+
+        historialExistente.setFecha(h.getFecha());
+        historialExistente.setDiagnostico(h.getDiagnostico());
+        historialExistente.setObservacion(h.getObservacion());
+        historialExistente.setPaciente(paciente);
+        historialExistente.setMedico(medico);
+
+        return repositorio.save(historialExistente);
+    }
+
     public List<Historial> listar() {
         return repositorio.findAll();
     }

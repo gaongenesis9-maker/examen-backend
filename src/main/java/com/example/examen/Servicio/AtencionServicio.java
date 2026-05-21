@@ -79,6 +79,28 @@ public class AtencionServicio {
         throw new RuntimeException("Solo ADMIN o MEDICO pueden registrar atención");
     }
 
+    public Atencion actualizar(Long id, Atencion a) {
+        Atencion atencionExistente = repositorio.findById(id)
+                .orElseThrow(() -> new RuntimeException("Atención no encontrada"));
+
+        validarAtencionBase(a, true, true);
+
+        Paciente paciente = pacienteRepositorio.findById(a.getPaciente().getId())
+                .orElseThrow(() -> new RuntimeException("Paciente no existe"));
+
+        Medico medico = medicoRepositorio.findById(a.getMedico().getId())
+                .orElseThrow(() -> new RuntimeException("Médico no existe"));
+
+        atencionExistente.setFecha(a.getFecha());
+        atencionExistente.setIndicaciones(a.getIndicaciones());
+        atencionExistente.setReceta(a.getReceta());
+        atencionExistente.setObservacion(a.getObservacion());
+        atencionExistente.setPaciente(paciente);
+        atencionExistente.setMedico(medico);
+
+        return repositorio.save(atencionExistente);
+    }
+
     public List<Atencion> listar() {
         return repositorio.findAll();
     }

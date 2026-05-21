@@ -57,6 +57,11 @@ public class AtencionControlador {
         return servicio.guardarSegunRol(a, username);
     }
 
+    @PutMapping("/{id}")
+    public Atencion actualizar(@PathVariable Long id, @Valid @RequestBody Atencion a) {
+        return servicio.actualizar(id, a);
+    }
+
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         servicio.eliminar(id);

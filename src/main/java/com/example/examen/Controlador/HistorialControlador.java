@@ -50,6 +50,11 @@ public class HistorialControlador {
         return servicio.guardarSegunRol(h, username);
     }
 
+    @PutMapping("/{id}")
+    public Historial actualizar(@PathVariable Long id, @Valid @RequestBody Historial h) {
+        return servicio.actualizar(id, h);
+    }
+
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         servicio.eliminar(id);
