@@ -77,19 +77,33 @@ public class HistorialServicio {
         Historial historialExistente = repositorio.findById(id)
                 .orElseThrow(() -> new RuntimeException("Historial no encontrado"));
 
-        validarHistorialBase(h, true, true);
+        if (h == null) {
+            throw new RuntimeException("El historial no puede ser nulo");
+        }
+
+        if (h.getFecha() == null) {
+            throw new RuntimeException("La fecha es obligatoria");
+        }
+
+        if (h.getDiagnostico() == null || h.getDiagnostico().trim().isEmpty()) {
+            throw new RuntimeException("El diagnóstico es obligatorio");
+        }
+
+        if (h.getObservacion() == null || h.getObservacion().trim().isEmpty()) {
+            throw new RuntimeException("La observación es obligatoria");
+        }
+
+        if (h.getPaciente() == null || h.getPaciente().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un paciente");
+        }
 
         Paciente paciente = pacienteRepositorio.findById(h.getPaciente().getId())
                 .orElseThrow(() -> new RuntimeException("Paciente no existe"));
-
-        Medico medico = medicoRepositorio.findById(h.getMedico().getId())
-                .orElseThrow(() -> new RuntimeException("Médico no existe"));
 
         historialExistente.setFecha(h.getFecha());
         historialExistente.setDiagnostico(h.getDiagnostico());
         historialExistente.setObservacion(h.getObservacion());
         historialExistente.setPaciente(paciente);
-        historialExistente.setMedico(medico);
 
         return repositorio.save(historialExistente);
     }
